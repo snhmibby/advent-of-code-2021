@@ -1,3 +1,3 @@
-module aof-2
+module aoc-2
 
 go 1.17
