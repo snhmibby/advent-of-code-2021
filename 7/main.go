@@ -86,8 +86,10 @@ func getNumbers(s string) []int {
 	return map_atoi(strings.Split(s, ","))
 }
 
+//it doesn't work without the pointers...
+//Apparently arrays are also call by value??
 func scanLine(a *[5]int, s string) bool {
-	n, _ := fmt.Sscanf(s, "%d%d%d%d%d", &a[0], &a[1], &a[2], &a[3], &a[4])
+	n, _ := fmt.Sscanf(s, "%d %d %d %d %d", &a[0], &a[1], &a[2], &a[3], &a[4])
 	return n == 5
 }
 
