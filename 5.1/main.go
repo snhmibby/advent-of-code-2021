@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"image"
 	"log"
 	"os"
 	"strings"
@@ -15,9 +16,7 @@ func croak(e error, msg string) {
 	}
 }
 
-type Location struct {
-	x, y int
-}
+type Location image.Point
 
 type Line struct {
 	from, to Location
@@ -42,18 +41,18 @@ func min(a, b int) int {
 func (l *Line) Covers() []Location {
 	covers := []Location{}
 	//only consider orthogonal lines for now
-	if l.from.x == l.to.x {
-		start := min(l.to.y, l.from.y)
-		end := max(l.to.y, l.from.y)
+	if l.from.X == l.to.X {
+		start := min(l.to.Y, l.from.Y)
+		end := max(l.to.Y, l.from.Y)
 		for i := start; i <= end; i++ {
-			covers = append(covers, Location{x: l.from.x, y: i})
+			covers = append(covers, Location{X: l.from.X, Y: i})
 		}
 	}
-	if l.from.y == l.to.y {
-		start := min(l.to.x, l.from.x)
-		end := max(l.to.x, l.from.x)
+	if l.from.Y == l.to.Y {
+		start := min(l.to.X, l.from.X)
+		end := max(l.to.X, l.from.X)
 		for i := start; i <= end; i++ {
-			covers = append(covers, Location{x: i, y: l.from.y})
+			covers = append(covers, Location{X: i, Y: l.from.Y})
 		}
 	}
 	return covers
@@ -61,7 +60,7 @@ func (l *Line) Covers() []Location {
 
 func parseLocation(s string) Location {
 	var l Location
-	n, _ := fmt.Sscanf(s, "%d,%d", &l.x, &l.y)
+	n, _ := fmt.Sscanf(s, "%d,%d", &l.X, &l.Y)
 	if n != 2 {
 		log.Fatalf("Could'nt parse location from (%s)\n", s)
 	}
@@ -80,7 +79,7 @@ func parseLine(s string) Line {
 }
 
 func orthogonal(l Line) bool {
-	return l.from.x == l.to.x || l.from.y == l.to.y
+	return l.from.X == l.to.X || l.from.Y == l.to.Y
 }
 
 func getInput() []Line {
@@ -105,7 +104,7 @@ func main() {
 	vents := getInput()
 	for _, l := range vents {
 		for _, f := range l.Covers() {
-			field[f.x][f.y]++
+			field[f.X][f.Y]++
 		}
 	}
 
