@@ -31,22 +31,6 @@ func (l *Line) Direction() image.Point {
 	return dir
 }
 
-func max(a, b int) int {
-	if a > b {
-		return a
-	} else {
-		return b
-	}
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	} else {
-		return b
-	}
-}
-
 func (l *Line) Covers() []image.Point {
 	covers := []image.Point{}
 	step := l.Direction()
