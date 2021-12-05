@@ -27,7 +27,6 @@ func (l *Line) Direction() image.Point {
 	y := float64(v.Y)
 	dist := math.Sqrt(x*x + y*y)
 	dir := image.Pt(int(math.Round(x/dist)), int(math.Round(y/dist)))
-	//log.Printf("%v, dir: %v\n", l, dir)
 	return dir
 }
 
@@ -89,7 +88,6 @@ func main() {
 		}
 	}
 
-	//number of points where 2 or more lines overlap
 	points := 0
 	for i := 0; i < N; i++ {
 		for j := 0; j < N; j++ {
