@@ -10,6 +10,38 @@ import (
 	"strings"
 )
 
+func parseLocation(s string) image.Point {
+	var l image.Point
+	n, _ := fmt.Sscanf(s, "%d,%d", &l.X, &l.Y)
+	if n != 2 {
+		log.Fatalf("Couldn't parse location from (%s)\n", s)
+	}
+	return l
+}
+
+func parseLine(s string) Line {
+	var l Line
+	sp := strings.Split(s, "->")
+	if len(sp) != 2 {
+		log.Fatalf("Couldn't parse line from (%s)\n", s)
+	}
+	l.from = parseLocation(sp[0])
+	l.to = parseLocation(sp[1])
+	return l
+}
+
+func getInput() []Line {
+	file, err := os.Open("input")
+	croak(err, "Cannot open file 'input'")
+	scanner := bufio.NewScanner(file)
+	var lines []Line
+	for scanner.Scan() {
+		l := parseLine(scanner.Text())
+		lines = append(lines, l)
+	}
+	return lines
+}
+
 func croak(e error, msg string) {
 	if e != nil {
 		fmt.Fprintf(os.Stderr, "%s (%v).", msg, e)
@@ -42,38 +74,6 @@ func (l *Line) Covers() []image.Point {
 		p = p.Add(step)
 	}
 	return covers
-}
-
-func parseLocation(s string) image.Point {
-	var l image.Point
-	n, _ := fmt.Sscanf(s, "%d,%d", &l.X, &l.Y)
-	if n != 2 {
-		log.Fatalf("Could'nt parse location from (%s)\n", s)
-	}
-	return l
-}
-
-func parseLine(s string) Line {
-	var l Line
-	sp := strings.Split(s, "->")
-	if len(sp) != 2 {
-		log.Fatalf("Couldn't parse line from (%s)\n", s)
-	}
-	l.from = parseLocation(sp[0])
-	l.to = parseLocation(sp[1])
-	return l
-}
-
-func getInput() []Line {
-	file, err := os.Open("input")
-	croak(err, "Cannot open file 'input'")
-	scanner := bufio.NewScanner(file)
-	var lines []Line
-	for scanner.Scan() {
-		l := parseLine(scanner.Text())
-		lines = append(lines, l)
-	}
-	return lines
 }
 
 const N = 1000
