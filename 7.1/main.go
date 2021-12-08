@@ -47,6 +47,13 @@ func abs(x int) int {
 	}
 }
 
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
 func fuel(x int) int {
 	return (x * (x + 1)) / 2
 }
@@ -64,10 +71,7 @@ func main() {
 	crabs := getInput()
 	minCost := 99999999
 	for i := 0; i < maxPos(crabs); i++ {
-		c := cost(crabs, i)
-		if c < minCost {
-			minCost = c
-		}
+		minCost = min(minCost, cost(crabs, i))
 	}
 	fmt.Println(minCost)
 }
