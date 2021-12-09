@@ -105,7 +105,10 @@ func calcBasin(m Map, b Basin, pt image.Point) {
 	}
 	b[pt] = true
 	for _, n := range neighbours(m, pt) {
-		calcBasin(m, b, n)
+		//only search 'up'
+		if height(m, pt) <= height(m, n) {
+			calcBasin(m, b, n)
+		}
 	}
 }
 
