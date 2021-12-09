@@ -56,22 +56,21 @@ func validPt(m Map, pt image.Point) bool {
 	return goodX && goodY
 }
 
-func neighbours(m Map, pt image.Point) []image.Point {
-	var offsets = [4]image.Point{
-		{-1, 0}, {1, 0}, {0, -1}, {0, 1},
-	}
-	var neig = []image.Point{}
+var offsets = [4]image.Point{
+	{-1, 0}, {1, 0}, {0, -1}, {0, 1},
+}
+
+func neighbours(m Map, pt image.Point) (res []image.Point) {
 	for _, n_ := range offsets {
 		n := pt.Add(n_)
 		if validPt(m, n) {
-			neig = append(neig, n)
+			res = append(res, n)
 		}
 	}
-	return neig
+	return
 }
 
-func lowPoints(m Map) []image.Point {
-	res := []image.Point{}
+func lowPoints(m Map) (res []image.Point) {
 	for r, row := range m {
 		for c, h := range row {
 			low := true
@@ -84,19 +83,18 @@ func lowPoints(m Map) []image.Point {
 			}
 		}
 	}
-	return res
+	return
 }
 
 func risk(m Map, pt image.Point) int {
 	return 1 + height(m, pt)
 }
 
-func sum_risk(m Map, pts []image.Point) int {
-	sum := 0
+func sum_risk(m Map, pts []image.Point) (sum int) {
 	for _, pt := range pts {
 		sum += risk(m, pt)
 	}
-	return sum
+	return
 }
 
 func calcBasin(m Map, b Basin, pt image.Point) {
@@ -119,8 +117,7 @@ func basin(m Map, pt image.Point) Basin {
 	return b
 }
 
-func basins(m Map) []int {
-	var b []int
+func basins(m Map) (b []int) {
 	for _, lp := range lowPoints(m) {
 		b = append(b, len(basin(m, lp)))
 	}
