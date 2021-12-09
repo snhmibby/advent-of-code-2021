@@ -104,7 +104,7 @@ func (d *Display) Solve() map[Wire]int {
 		}
 	}
 	//part 2, the hard ones
-	// only assume 1,4,7 and 8 segments' are known
+	// only assume 1,4,7 and 8 segments are known
 	for _, w := range d.combinations {
 		switch w.nSegments() {
 		case 5:

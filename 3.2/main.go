@@ -10,13 +10,9 @@ import (
 func mkInt(s string) int {
 	var x int
 	for i := 0; i < Nbits; i++ {
-		var b int
-		if s[i] == '0' {
-			b = 0
-		} else {
-			b = 1
+		if s[i] == '1' {
+			x |= 1 << (Nbits - 1 - i)
 		}
-		x |= b << (Nbits - 1 - i)
 	}
 	return x
 }
