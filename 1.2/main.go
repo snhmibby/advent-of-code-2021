@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 )
@@ -30,7 +29,6 @@ func getInput() []int {
 }
 
 func sum(a []int) int {
-	log.Print(a)
 	s := 0
 	for i := 0; i < len(a); i++ {
 		s += a[i]
