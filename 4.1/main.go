@@ -113,6 +113,7 @@ func main() {
 			row++
 			if row == N {
 				score, num := card.Check(numbers)
+				//fmt.Println(num, score)
 				if num < bestnum {
 					bestnum = num
 					bestscore = score
