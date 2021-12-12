@@ -1,8 +1,9 @@
 module Main where
 
-import Data.Functor
 import Control.Monad
 import Data.Array.IO
+import Data.Functor
+import Data.List
 
 type Location = (Int, Int)
 type Map = IOArray Location Int
@@ -69,6 +70,6 @@ printMap m = do
 main :: IO ()
 main = do
   map <- input >>= readMap
-  flashes <- forM [1..100] (const $ step map)
-  print flashes
-  print (sum flashes)
+  flashes <- forM [1..1000] (const $ step map)
+  print (sum $ take 100 flashes)
+  print $ 1 + length (takeWhile (/=100) flashes)
