@@ -70,6 +70,6 @@ printMap m = do
 main :: IO ()
 main = do
   map <- input >>= readMap
-  flashes <- forM [1..1000] (const $ step map)
+  flashes <- forM [1..507] (const $ step map)
   print (sum $ take 100 flashes)
   print $ 1 + length (takeWhile (/=100) flashes)
