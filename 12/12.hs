@@ -46,7 +46,4 @@ walk g s n p
 
 paths g = execWriter $ walk g Set.empty "start" []
 
-main :: IO ()
-main = do
-  g <- input
-  print $ length $ paths g
+main = input >>= print . length . paths
