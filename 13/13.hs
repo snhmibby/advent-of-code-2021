@@ -29,7 +29,7 @@ fold g (FoldX at) = foldx g at
 fold g (FoldY at) = foldy g at
 
 foldy :: Grid -> Int -> Grid
-foldy g at = Set.filter ((<=at).snd) $ Set.map mapy g
+foldy g at = Set.filter ((<at).snd) $ Set.map mapy g
   where
     mapy (x,y) =
       if y > at
@@ -37,7 +37,7 @@ foldy g at = Set.filter ((<=at).snd) $ Set.map mapy g
       else (x,y)
 
 foldx :: Grid -> Int -> Grid
-foldx g at = Set.filter ((<=at).fst) $ Set.map mapx g
+foldx g at = Set.filter ((<at).fst) $ Set.map mapx g
   where
     mapx (x,y) =
       if x > at
