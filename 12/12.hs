@@ -25,6 +25,7 @@ readEdge s = case splitOn "-" s of
       [to, from] -> (to, from)
       _ -> error $ "bad edge in input: " ++ s
 
+mkGraph :: [Edge] -> Graph
 mkGraph = foldr addEdge Map.empty
   where
     addEdge (v1,v2) = Map.insertWith (++) v1 [v2] . Map.insertWith (++) v2 [v1]

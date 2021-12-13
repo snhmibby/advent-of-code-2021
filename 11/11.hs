@@ -29,8 +29,8 @@ input = readFile "./input" <&> lines
 inc1 :: Map -> IO ()
 inc1 m = inc m (range bounds)
 inc m b = forM_ b $ \i -> do
-    x <- readArray m i
-    writeArray m i (x+1)
+  x <- readArray m i
+  writeArray m i (x+1)
 
 -- step 2: flash if  == 10
 flash :: Map -> IO ()
