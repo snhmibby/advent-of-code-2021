@@ -2,14 +2,15 @@ module Main where
 
 import Data.Bifunctor
 import Data.Functor
-import Data.List.Split
 import Data.List
+import Data.List.Split
 import qualified Data.Map as Map
 
+type Pattern = (Char, Char)
 type Count = Map.Map Char Integer
-type Freq = Map.Map String Integer
-type Rules = Map.Map String String
- 
+type Freq = Map.Map Pattern Integer
+type Rules = Map.Map Pattern String
+
 input :: IO (Freq, Rules)
 input = do 
   template:_:rules' <- readFile "./input" <&> lines
@@ -17,26 +18,24 @@ input = do
   let rules = Map.fromList $ map (tuple . splitOn " -> ") rules'
   return (freq, rules)
     where
-      tuple [a,b] = (a,b)
+      tuple [[a,as],b] = ((a,as),b)
 
 str2Freq :: String -> Freq
-str2Freq s = Map.fromListWith (+) $ zip (zipWith (\a b -> [a,b]) s (tail s)) (repeat 1)
+str2Freq s = Map.fromListWith (+) $ zip (zip s $ tail s) (repeat 1)
 
 step :: Rules -> Freq -> Freq
 step rules = Map.fromListWith (+) . concatMap addFreq . Map.assocs
   where
-    addFreq :: (String, Integer) -> [(String, Integer)]
-    addFreq (k@[a,b], n) = case Map.lookup k rules of
+    addFreq (k@(a,b), n) = case Map.lookup k rules of
       Nothing  -> [(k,n)]
-      Just [c] -> [([a,c], n), ([c,b], n)]
+      Just [c] -> [((a,c), n), ((c,b), n)]
 
 step' r = iterate (step r)
 
 count :: Freq -> Count
-count = Map.fromListWith (+) . map divCount . concatMap split . Map.assocs
+count = Map.map (\x -> x `div` 2 + x `mod` 2) . Map.fromListWith (+) . concatMap split . Map.assocs
   where
-    divCount = second $ \x -> (x `div` 2) + (x `mod` 2)
-    split ([a,b], n) = [(a,n), (b,n)]
+    split ((a,b), n) = [(a,n), (b,n)]
 
 count' :: Freq -> (Integer, Integer)
 count' f = (maximum c, minimum c)
@@ -49,4 +48,3 @@ main = do
   let part2 = step' rules s !! 40
   let (mx, mn) = count' part2
   print $ mx - mn
-
