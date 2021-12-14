@@ -1,5 +1,6 @@
 module Main where
 
+import Control.Arrow
 import Control.Monad
 import Data.Functor
 import Data.List
@@ -22,12 +23,11 @@ input = do
         [_, _, 'x':'=':xs] -> FoldX (read xs)
 
 fold :: Grid -> Fold -> Grid
-fold g f = case f of
-  FoldX at -> Set.map (foldx at) g
-  FoldY at -> Set.map (foldy at) g
+fold g f = Set.map (fold' f) g
   where
-    foldy at (x,y) = if y > at then (x, at - (y - at)) else (x,y)
-    foldx at (x,y) = if x > at then (at - (x - at), y) else (x,y)
+    fold' (FoldX x) = first $ flip' x
+    fold' (FoldY y) = second $ flip' y
+    flip' at n = if n > at then  at - (n-at) else n
 
 bounds :: Grid -> (Int, Int)
 bounds g = foldl' (\(x,y) (x',y')-> (max x x', max y y')) (0,0) $ Set.elems g
