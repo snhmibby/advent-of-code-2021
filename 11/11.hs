@@ -22,8 +22,8 @@ char2Digit c = read [c]
 readMap :: [String] -> IO Map
 readMap l = newListArray bounds $ map char2Digit $ concat l
 
-input :: IO [String]
-input = readFile "./input" <&> lines
+input :: IO Map
+input = readFile "./input" >>=  readMap . lines
 
 -- step 1: increase all by 1
 inc1 :: Map -> IO ()
@@ -69,7 +69,7 @@ printMap m = do
 
 main :: IO ()
 main = do
-  map <- input >>= readMap
+  map <- input
   flashes <- forM [1..507] (const $ step map)
   print (sum $ take 100 flashes)
   print $ 1 + length (takeWhile (/=100) flashes)
