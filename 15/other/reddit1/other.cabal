@@ -1,19 +1,19 @@
 cabal-version:      2.4
-name:               x15
+name:               other
 version:            0.1.0.0
 
 -- A short (one-line) description of the package.
-synopsis: advent of code 2021 day 15.
+-- synopsis:
 
 -- A longer description of the package.
-description: Trying out making a cabal package
+-- description:
 
 -- A URL where users can report bugs.
 -- bug-reports:
 
 -- The license under which the package is released.
-license: MIT
-author:             Jurjen
+-- license:
+author:             Jur
 maintainer:         jurjenm@yahoo.com
 
 -- A copyright notice.
@@ -21,7 +21,7 @@ maintainer:         jurjenm@yahoo.com
 -- category:
 extra-source-files: CHANGELOG.md
 
-executable x15
+executable other
     main-is:          Main.hs
 
     -- Modules included in this executable, other than Main.
@@ -29,10 +29,9 @@ executable x15
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
-    build-depends: 
+    build-depends:
         base ^>=4.14.3.0,
-        search-algorithms,
-        split,
+        array,
         containers
     hs-source-dirs:   app
     default-language: Haskell2010

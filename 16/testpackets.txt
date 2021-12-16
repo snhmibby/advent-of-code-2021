@@ -1,0 +1,11 @@
+1101.0010.0001.0000.0101.0000
+VVVT.TTAA AAAB.BBBB.CCCC.C___
+VVVT.TT-----literal 10 ---XXX
+  D    2    1    0    5    0   
+
+
+10100 == 20
+1101.0010.0001.0001.0010.0000
+VVVT.TTAA AAAB.BBBB.CCCC.C___
+VVVT.TT-----literal 20 ---XXX
+  D    2    1    1    2    0   
