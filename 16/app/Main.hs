@@ -77,7 +77,7 @@ literal b = do
         return  (rest', (l+1, (value `shiftL` (4*l)) + valuerest))
 
 showbits :: Integer -> String
-showbits x = showbits' x -- lol' each 'bit' is a character :D
+showbits x = reverse $ showbits' x -- lol' each 'bit' is a character :D
   where
     showbits' :: Integer -> String
     showbits' 0 = ""
@@ -89,10 +89,10 @@ showbits x = showbits' x -- lol' each 'bit' is a character :D
 
 main :: IO ()
 main = do
-  let pkt = showbits $ read ("0x" ++ "D21050") -- literal ?
-  let pkt = showbits $ read ("0x" ++ "D21120") -- literal ?
+  let pkt = showbits $ read ("0x" ++ "D21028") -- literal 5
+  let pkt = showbits $ read ("0x" ++ "D21050") -- literal 10
+  let pkt = showbits $ read ("0x" ++ "D21120") -- literal 20
   let pkt = showbits $ read ("0x" ++ "D2FE28") -- literal 2021
-  let pkt = showbits $ read ("0x" ++ "D21028") -- literal ?
   print $ drop 6 pkt
   case parsePacket pkt of
     Nothing -> print $ "bad parse: " ++ show pkt
