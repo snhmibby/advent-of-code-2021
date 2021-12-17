@@ -1,104 +1,139 @@
 module Main where
 
+import Control.Monad
+import Control.Monad.State.Lazy
 import Data.Bits
-import Text.Parsec
-
-type Range = (Int, Int)
-type BitString = String
-
-type Packet = [Layer]
-data Layer
-  = Header { version, typeID :: Integer }
-  | Literal { value :: Integer }
-  | BadPacket String
-  deriving (Show)
-
-type PacketParser a = BitString -> Maybe (BitString, a)
-
-len :: Range -> Int
-len (f,t) = t - f
-
--- take the number of a range in the bitstring
-numOf :: Int -> BitString -> Integer
-numOf l b = foldl addbit 0 $ take l b
-  where
-    addbit :: Integer -> Char -> Integer
-    addbit x '1' = 2*x + 1
-    addbit x '0' = 2*x
-    addbit _ x = error "??"
-    -- mask = (1 `shiftL` (l+1)) - 1   -- if bitstring was an integer
-
-numOfTest
-  = [ ("111", 7)
-    , ("000", 0)
-    , ("001", 1)
-    , ("010", 2)
-    , ("011", 3)
-    , ("100", 4)
-    , ("101", 5)
-    , ("10000", 16)
-    ]
-
-testNumOf :: Bool
-testNumOf = all (== True) $ map test1 numOfTest
-  where test1 (input, want) = want == (numOf (length input) input)
-
-parsePacket :: PacketParser Packet
-parsePacket bits = do
-  (nextbits, h@(Header _ id)) <- parseHeader bits
-  (nextbits', layer) <- case id of
-    4 -> literal nextbits
-    _ -> return (nextbits, BadPacket $ show nextbits)
-  return (nextbits', [h, layer])
-
-parseHeader :: PacketParser Layer
-parseHeader bits = do
-  let version = numOf 3 bits
-      typeid  = numOf 3 (drop 3 bits)
-  return (drop 6 bits, Header version typeid)
-
--- a list of 5 bit-portions.
--- bit 1 == 1 -> not the end
-literal :: PacketParser Layer
-literal [] = error "bad literal (empty bitstring)"
-literal b = do
-  (rest, (_, value)) <- go b
-  return (rest, Literal value)
-  where
-    go :: PacketParser (Int, Integer)
-    go [] = error "empty bitstring for literal"
-    go (b:bs) = do
-      let value = numOf 4 bs
-          rest = drop 4 bs
-      if b == '0' -- don't recurse
-      then return (rest, (1, value))
-      else do
-        (rest', (l, valuerest)) <- go rest
-        return  (rest', (l+1, (value `shiftL` (4*l)) + valuerest))
-
-showbits :: Integer -> String
-showbits x = reverse $ showbits' x -- lol' each 'bit' is a character :D
-  where
-    showbits' :: Integer -> String
-    showbits' 0 = ""
-    showbits' bits = do
-      case 1 .&. bits of
-        0 -> '0' : showbits' (bits `shiftR` 1)
-        1 -> '1' : showbits' (bits `shiftR` 1)
-        d -> error $ "bad bits?? " ++ show d
+import Data.Char
+import Data.Functor
+import Data.List
+import Debug.Trace
 
 main :: IO ()
 main = do
-  let pkt = showbits $ read ("0x" ++ "D21028") -- literal 5
-  let pkt = showbits $ read ("0x" ++ "D21050") -- literal 10
-  let pkt = showbits $ read ("0x" ++ "D21120") -- literal 20
-  let pkt = showbits $ read ("0x" ++ "D2FE28") -- literal 2021
-  print $ drop 6 pkt
-  case parsePacket pkt of
-    Nothing -> print $ "bad parse: " ++ show pkt
-    Just (rest, packet) -> do
-      print rest
-      print packet
+  pkts <- readFile "input" <&> parse packets . mkbits . concat . lines
+  print $ versionSum pkts -- part 1
+  print $ val pkts -- part 2
 
---- let's try with parsec
+data Packet
+  = Literal { version, typeid, value :: Int }
+  | Operator { version, typeid :: Int, operands :: [Packet] }
+  deriving (Show)
 
+type Parser = State Bit -- XXX can't fail
+
+type Bit = [Int]
+
+mkbits = concatMap hexDigit 
+  where
+    hexDigit :: Char -> Bit
+    hexDigit c = case toUpper c of
+      '0' -> [0,0,0,0]
+      '1' -> [0,0,0,1]
+      '2' -> [0,0,1,0]
+      '3' -> [0,0,1,1]
+      '4' -> [0,1,0,0]
+      '5' -> [0,1,0,1]
+      '6' -> [0,1,1,0]
+      '7' -> [0,1,1,1]
+      '8' -> [1,0,0,0]
+      '9' -> [1,0,0,1]
+      'A' -> [1,0,1,0]
+      'B' -> [1,0,1,1]
+      'C' -> [1,1,0,0]
+      'D' -> [1,1,0,1]
+      'E' -> [1,1,1,0]
+      'F' -> [1,1,1,1]
+      _ -> error "Weird bits!"
+
+parse :: Parser a -> Bit -> a
+parse = evalState
+
+split :: Int -> Parser Bit
+split n = do
+  l <- get
+  let (ns,rest) = splitAt n l
+  put rest
+  return ns
+
+number :: Int -> Parser Int
+number n = foldl' (\x b -> 2*x + b) 0 <$> split n
+
+fin :: Parser Bool
+fin = null <$> get
+
+packets :: Parser [Packet]
+packets = do
+  f <- fin
+  if f
+  then return []
+  else do
+    p <- packet
+    ps <- packets
+    return (p:ps)
+
+packet :: Parser Packet
+packet = do
+  version <- number 3
+  typeid  <- number 3
+  if typeid == 4
+    then Literal  version typeid <$> literal
+    else Operator version typeid <$> operator
+
+literal :: Parser Int
+literal = literal' <&> snd
+  where
+    literal' = do
+      continue <- number 1
+      value <- number 4
+      if continue == 0
+      then return (1, value)
+      else do
+        (dpt, v) <- literal'
+        return (dpt+1, v + value `shiftL` (dpt * 4))
+
+operator :: Parser [Packet]
+operator = do
+  length_id <- number 1
+  if length_id == 0
+    then do
+      len <- number 15
+      split len <&> parse packets
+    else do
+      pkts <- number 11
+      forM [1..pkts] $ const packet
+
+-- part 1
+versionSum :: [Packet] -> Int
+versionSum = sum . map versionSum'
+
+versionSum' :: Packet -> Int
+versionSum' (Literal v _ _) = v
+versionSum' (Operator v _ op) = v + versionSum op
+
+-- part 2
+val :: [Packet] -> [Int]
+val = map val'
+
+val' :: Packet -> Int
+val' (Literal _ _ v) = v
+val' (Operator _ id os) = let f = op id in f (val os)
+
+op :: Int -> ([Int] -> Int)
+op id = case lookup id ops of
+  Nothing -> error "bad operator"
+  Just f -> f
+
+ops :: [(Int, [Int] -> Int)]
+ops = 
+  [ (0, sum)
+  , (1, product)
+  , (2, minimum)
+  , (3, maximum)
+  , (5, binop (>))
+  , (6, binop (<))
+  , (7, binop (==))
+  ]
+
+binop :: (Int -> Int -> Bool) -> [Int] -> Int
+binop f [l,r] = if l `f` r then 1 else 0
+binop _ _ = error "bad"
