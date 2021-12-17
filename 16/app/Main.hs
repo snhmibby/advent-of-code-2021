@@ -76,20 +76,16 @@ packet = do
   version <- number 3
   typeid  <- number 3
   if typeid == 4
-    then Literal  version typeid <$> literal
+    then Literal  version typeid <$> literal 0
     else Operator version typeid <$> operator
 
-literal :: Parser Int
-literal = literal' <&> snd
-  where
-    literal' = do
-      continue <- number 1
-      value <- number 4
-      if continue == 0
-      then return (1, value)
-      else do
-        (dpt, v) <- literal'
-        return (dpt+1, v + value `shiftL` (dpt * 4))
+literal :: Int -> Parser Int
+literal v = do
+    continue <- number 1
+    val <- number 4 <&> (+ v*16)
+    if continue == 0
+    then return val
+    else literal val
 
 operator :: Parser [Packet]
 operator = do
